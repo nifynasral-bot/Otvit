@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+duplicated_chats.json
+.vscode/
+.idea/
