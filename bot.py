@@ -5,7 +5,7 @@ import json
 import os
 import threading
 
-TOKEN = os.getenv("VK_TOKEN", "vk1.a.mqK7Hhet4GaA6NxNlMbnc0YP2ZHC_18aTaVabwrFzfC6yBFQ4xwA3vdWqHtsMwCIg7Uk6CH934HgBKxtpHF1qjn8Zpk1vNdsWKSlPSCQPvp1vz-lELEAcm85wBEtr9iOmF-zUKRPK_0Epw_Pg0a6eCgOCaYwp_Wp3Vd0VbgaxRNxRg8oV90PQgY-C6vYdJTELxIL2P0fy17-KoMWadkCfQ")
+TOKEN = os.getenv("VK_TOKEN", vk1.a.mqK7Hhet4GaA6NxNlMbnc0YP2ZHC_18aTaVabwrFzfC6yBFQ4xwA3vdWqHtsMwCIg7Uk6CH934HgBKxtpHF1qjn8Zpk1vNdsWKSlPSCQPvp1vz-lELEAcm85wBEtr9iOmF-zUKRPK_0Epw_Pg0a6eCgOCaYwp_Wp3Vd0VbgaxRNxRg8oV90PQgY-C6vYdJTELxIL2P0fy17-KoMWadkCfQ"")
 OWNER_ID = 795602888
 
 DUPLICATED_FILE = "duplicated_chats.json"
@@ -14,8 +14,6 @@ SETTINGS_FILE = "settings.json"
 
 greeted_users = set()
 
-
-# ==================== ФАЙЛЫ ====================
 
 def load_json(filename, default):
     if os.path.exists(filename):
@@ -59,8 +57,6 @@ def load_settings():
 def save_settings(data):
     save_json(SETTINGS_FILE, data)
 
-
-# ==================== УТИЛИТЫ ====================
 
 def get_user_name(vk, user_id):
     try:
@@ -134,10 +130,7 @@ def get_auto_reply(settings):
     )
 
 
-# ==================== АВТО-ПРИНЯТИЕ ЗАЯВОК ====================
-
 def auto_accept_friends(vk):
-    """Проверяет заявки в друзья раз в 30 секунд"""
     already_processed = set()
 
     while True:
@@ -150,28 +143,19 @@ def auto_accept_friends(vk):
                     continue
 
                 try:
-                    # Пробуем принять
                     response = vk.friends.add(user_id=uid)
-
-                    # response == 1 значит заявка принята
-                    # response == 2 значит мы отправили заявку (подписка)
-                    # response == 4 значит повторная заявка
                     if response == 1:
                         name = get_user_name(vk, uid)
                         print(f"[+] Принята заявка: {name} ({uid})", flush=True)
-                    
                     already_processed.add(uid)
-
                 except vk_api.exceptions.ApiError:
                     already_processed.add(uid)
 
-            time.sleep(30)
-
         except Exception:
-            time.sleep(60)
+            pass
 
+        time.sleep(30)
 
-# ==================== РАССЫЛКА ====================
 
 def get_all_dialogs(vk):
     all_users = set()
@@ -239,8 +223,6 @@ def do_broadcast(vk, text, user_id):
                  f"❌ Ошибок: {failed}")
 
 
-# ==================== ОБРАБОТКА БЕСЕДЫ ====================
-
 def process_chat_message(vk, event):
     text = event.text.lower() if event.text else ""
 
@@ -250,8 +232,6 @@ def process_chat_message(vk, event):
         print(f"[i] Упоминание в чате {event.peer_id}", flush=True)
 
 
-# ==================== ОБРАБОТКА ЛС ====================
-
 def process_message(vk, event, duplicated_data, banned_data, settings):
     user_id = event.user_id
     text = event.text.strip() if event.text else ""
@@ -260,7 +240,6 @@ def process_message(vk, event, duplicated_data, banned_data, settings):
 
     print(f"[<] {user_name} ({user_id}): {text}", flush=True)
 
-    # Бан-проверка
     if user_id in banned_data["users"] and user_id != OWNER_ID:
         return
 
@@ -312,14 +291,11 @@ def process_message(vk, event, duplicated_data, banned_data, settings):
     # === КОМАНДЫ ТОЛЬКО ВЛАДЕЛЬЦА ===
 
     if user_id != OWNER_ID:
-        # Автоответ обычным пользователям
         if settings.get("autoresponder_enabled", True):
             if user_id not in greeted_users:
                 greeted_users.add(user_id)
                 send_message(vk, user_id, get_auto_reply(settings))
         return
-
-    # --- Далее ТОЛЬКО для владельца ---
 
     if text_lower in ["/помощьадмин", "/админ"]:
         send_message(vk, user_id,
@@ -553,8 +529,6 @@ def process_message(vk, event, duplicated_data, banned_data, settings):
         return
 
 
-# ==================== ЗАПУСК ====================
-
 def connect_vk():
     while True:
         try:
@@ -571,7 +545,7 @@ def connect_vk():
 
 def main():
     print("=" * 50, flush=True)
-    print("    VK Автоответчик v2.1", flush=True)
+    print("    VK Автоответчик v2.2", flush=True)
     print("=" * 50, flush=True)
 
     if not TOKEN or len(TOKEN) < 20:
@@ -584,7 +558,6 @@ def main():
     banned_data = load_banned()
     settings = load_settings()
 
-    # Заявки в друзья — отдельный поток
     threading.Thread(
         target=auto_accept_friends,
         args=(vk,),
@@ -597,7 +570,7 @@ def main():
 
     while True:
         try:
-            longpoll = VkLongPoll(vk_session)
+            longpoll = VkLongPoll(vk_session, mode=2)
 
             for event in longpoll.listen():
                 if event.type != VkEventType.MESSAGE_NEW:
@@ -626,7 +599,7 @@ def main():
 
         except Exception as e:
             print(f"[!] Обрыв: {e}", flush=True)
-            time.sleep(5)
+            time.sleep(10)
             try:
                 vk_session, vk = connect_vk()
                 threading.Thread(
