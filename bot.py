@@ -5,7 +5,7 @@ import json
 import os
 import threading
 
-TOKEN = os.getenv("VK_TOKEN", "vk1.a.mqK7Hhet4GaA6NxNlMbnc0YP2ZHC_18aTaVabwrFzfC6yBFQ4xwA3vdWqHtsMwCIg7Uk6CH934HgBKxtpHF1qjn8Zpk1vNdsWKSlPSCQPvp1vz-lELEAcm85wBEtr9iOmF-zUKRPK_0Epw_Pg0a6eCgOCaYwp_Wp3Vd0VbgaxRNxRg8oV90PQgY-C6vYdJTELxIL2P0fy17-KoMWadkCfQ")
+TOKEN = os.getenv("VK_TOKEN", "k1.a.mqK7Hhet4GaA6NxNlMbnc0YP2ZHC_18aTaVabwrFzfC6yBFQ4xwA3vdWqHtsMwCIg7Uk6CH934HgBKxtpHF1qjn8Zpk1vNdsWKSlPSCQPvp1vz-lELEAcm85wBEtr9iOmF-zUKRPK_0Epw_Pg0a6eCgOCaYwp_Wp3Vd0VbgaxRNxRg8oV90PQgY-C6vYdJTELxIL2P0fy17-KoMWadkCfQ")
 OWNER_ID = 795602888
 
 DUPLICATED_FILE = "duplicated_chats.json"
